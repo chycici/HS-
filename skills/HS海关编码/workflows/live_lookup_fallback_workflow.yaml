@@ -1,0 +1,78 @@
+name: "live_lookup_fallback_workflow"
+version: "1.0.0"
+description: "本地缓存和同步库未命中时的实时补查与缓存写回流程"
+
+steps:
+  - id: query_builder
+    name: "查询构造"
+    type: "system"
+    inputs:
+      - name: "query_input"
+        type: "object"
+    outputs:
+      - name: "normalized_query"
+        type: "object"
+    logic: |
+      return query_input
+
+  - id: live_lookup_agent
+    name: "实时查询"
+    type: "skill"
+    skill: "HS海关编码"
+    inputs:
+      - name: "normalized_query"
+        value: "{{normalized_query}}"
+    outputs:
+      - name: "live_results"
+        type: "array"
+
+  - id: source_normalizer
+    name: "结果标准化"
+    type: "skill"
+    skill: "HS海关编码"
+    inputs:
+      - name: "live_results"
+        value: "{{live_results}}"
+    outputs:
+      - name: "normalized_results"
+        type: "array"
+
+  - id: confidence_scorer
+    name: "可信度评分"
+    type: "system"
+    inputs:
+      - name: "normalized_results"
+        type: "array"
+    outputs:
+      - name: "scored_results"
+        type: "array"
+    logic: |
+      return normalized_results
+
+  - id: cache_writer
+    name: "缓存写回"
+    type: "skill"
+    skill: "HS海关编码"
+    inputs:
+      - name: "scored_results"
+        value: "{{scored_results}}"
+    outputs:
+      - name: "cache_write_result"
+        type: "object"
+
+  - id: response_formatter
+    name: "响应格式化"
+    type: "system"
+    inputs:
+      - name: "scored_results"
+        value: "{{scored_results}}"
+      - name: "cache_write_result"
+        value: "{{cache_write_result}}"
+    outputs:
+      - name: "formatted_response"
+        type: "object"
+    logic: |
+      return {
+        "results": scored_results,
+        "cache_write_result": cache_write_result
+      }

@@ -1,0 +1,14 @@
+[
+  {
+    "query_key": "8507600090",
+    "query_type": "rebate",
+    "hs_code_cn": "8507600090",
+    "rebate_rate": "13%",
+    "source_type": "synced",
+    "source_reference": "sample://synced_rebate_rates",
+    "updated_at": "2026-04-07T00:00:00+08:00",
+    "fetched_at": "2026-04-07T00:00:00+08:00",
+    "confidence": 0.9,
+    "review_required": false
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "query_key": "8507600090",
+    "query_type": "supervision",
+    "hs_code_cn": "8507600090",
+    "supervision_code": "A",
+    "required_documents": [
+      "报关单",
+      "合同",
+      "发票",
+      "装箱单"
+    ],
+    "source_type": "synced",
+    "source_reference": "sample://synced_supervision_conditions",
+    "updated_at": "2026-04-07T00:00:00+08:00",
+    "fetched_at": "2026-04-07T00:00:00+08:00",
+    "confidence": 0.82,
+    "review_required": false
+  }
+]

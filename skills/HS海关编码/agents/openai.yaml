@@ -1,0 +1,4 @@
+interface:
+  display_name: "HS海关编码"
+  short_description: "出口报关 HS 编码归类、退税率/监管条件查询、自动同步与缓存写回"
+  default_prompt: "Use $HS海关编码 to classify a product, query customs metadata, and follow cache -> synced -> live lookup -> cache writeback."

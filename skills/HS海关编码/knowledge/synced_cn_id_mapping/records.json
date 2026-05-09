@@ -1,0 +1,15 @@
+[
+  {
+    "query_key": "8507600090",
+    "query_type": "cn_id_mapping",
+    "cn_hs_code": "8507600090",
+    "id_hs_code": "85076090",
+    "mapping_basis": "公开目录映射样例，仅供候选参考",
+    "source_type": "synced",
+    "source_reference": "sample://synced_cn_id_mapping",
+    "updated_at": "2026-04-07T00:00:00+08:00",
+    "fetched_at": "2026-04-07T00:00:00+08:00",
+    "confidence": 0.71,
+    "review_required": true
+  }
+]

@@ -1,0 +1,69 @@
+name: "export_customs_autosync_workflow"
+version: "1.0.0"
+description: "出口报关主业务流，优先查缓存和同步库，未命中再实时补查"
+
+steps:
+  - id: input_router
+    name: "输入路由"
+    type: "workflow"
+    ref: "../workflow.yaml#input_router"
+
+  - id: product_doc_parser
+    name: "技术资料解析"
+    type: "workflow"
+    ref: "../workflow.yaml#product_doc_parser"
+
+  - id: image_classifier
+    name: "图片初判"
+    type: "workflow"
+    ref: "../workflow.yaml#image_classifier"
+
+  - id: normalize_product_info
+    name: "商品信息标准化"
+    type: "workflow"
+    ref: "../workflow.yaml#normalize_product_info"
+
+  - id: case_retriever
+    name: "历史案例检索"
+    type: "workflow"
+    ref: "../workflow.yaml#case_retriever"
+
+  - id: hs_classifier_cn
+    name: "中国 HS 候选归类"
+    type: "workflow"
+    ref: "../workflow.yaml#hs_classifier_cn"
+
+  - id: declaration_elements_writer
+    name: "报关要素生成"
+    type: "workflow"
+    ref: "../workflow.yaml#declaration_elements_writer"
+
+  - id: export_rebate_checker
+    name: "退税率查询"
+    type: "workflow"
+    ref: "../workflow.yaml#export_rebate_checker"
+
+  - id: supervision_checker
+    name: "监管条件查询"
+    type: "workflow"
+    ref: "../workflow.yaml#supervision_checker"
+
+  - id: hs_mapper_cn_id
+    name: "中国-印尼编码候选映射"
+    type: "workflow"
+    ref: "../workflow.yaml#hs_mapper_cn_id"
+
+  - id: bilingual_declaration_writer
+    name: "双语申报文本生成"
+    type: "workflow"
+    ref: "../workflow.yaml#bilingual_declaration_writer"
+
+  - id: document_generator
+    name: "报关资料草稿输出"
+    type: "workflow"
+    ref: "../workflow.yaml#document_generator"
+
+  - id: result_aggregator
+    name: "结果聚合"
+    type: "workflow"
+    ref: "../workflow.yaml#result_aggregator"

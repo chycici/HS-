@@ -1,0 +1,24 @@
+[
+  {
+    "query_key": "锂离子蓄电池组",
+    "query_type": "product",
+    "hs_code_cn": "8507600090",
+    "product_name_cn": "其他锂离子蓄电池",
+    "description": "适用于储能或设备供电的锂离子蓄电池组候选项",
+    "rebate_rate": "13%",
+    "supervision_code": "A",
+    "required_documents": [
+      "报关单",
+      "合同",
+      "发票",
+      "装箱单"
+    ],
+    "id_hs_code": "85076090",
+    "mapping_basis": "基于公开税则描述的候选映射，仅供人工复核",
+    "source_type": "live_lookup",
+    "source_reference": "example://live_lookup_candidates",
+    "fetched_at": "2026-04-07T00:00:00+08:00",
+    "confidence": 0.62,
+    "review_required": true
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "status": "completed",
+  "target": "hs",
+  "source": "/tmp/hs_sync_test.csv",
+  "synced_at": "2026-04-07T22:48:00+08:00",
+  "output": "<skill-dir>/knowledge/synced_hs_rules/records.json"
+}

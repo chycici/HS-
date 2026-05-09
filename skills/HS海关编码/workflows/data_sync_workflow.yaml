@@ -1,0 +1,72 @@
+name: "data_sync_workflow"
+version: "1.0.0"
+description: "公开资料自动抓取、解析、标准化与写入同步知识库"
+
+steps:
+  - id: source_fetcher
+    name: "来源抓取"
+    type: "skill"
+    skill: "HS海关编码"
+    outputs:
+      - name: "fetched_sources"
+        type: "array"
+
+  - id: import_parser
+    name: "结构化解析"
+    type: "skill"
+    skill: "HS海关编码"
+    inputs:
+      - name: "fetched_sources"
+        value: "{{fetched_sources}}"
+    outputs:
+      - name: "parsed_records"
+        type: "array"
+
+  - id: source_normalizer
+    name: "来源标准化"
+    type: "skill"
+    skill: "HS海关编码"
+    inputs:
+      - name: "parsed_records"
+        value: "{{parsed_records}}"
+    outputs:
+      - name: "normalized_records"
+        type: "array"
+
+  - id: validator
+    name: "数据校验"
+    type: "system"
+    inputs:
+      - name: "normalized_records"
+        type: "array"
+    outputs:
+      - name: "validated_records"
+        type: "array"
+    logic: |
+      return [record for record in normalized_records if record.get("source_reference")]
+
+  - id: writer_to_synced_knowledge
+    name: "写入同步知识层"
+    type: "skill"
+    skill: "HS海关编码"
+    inputs:
+      - name: "validated_records"
+        value: "{{validated_records}}"
+    outputs:
+      - name: "write_result"
+        type: "object"
+
+  - id: sync_reporter
+    name: "同步报告"
+    type: "system"
+    inputs:
+      - name: "write_result"
+        value: "{{write_result}}"
+    outputs:
+      - name: "sync_report"
+        type: "object"
+    logic: |
+      return {
+        "status": "completed",
+        "write_result": write_result
+      }

@@ -1,0 +1,127 @@
+name: "HS海关编码"
+version: "1.0.0"
+description: "免手工录库版 HS 海关编码归类与出口报关查询工作流"
+
+# -----------------------------------------------------------------------
+# 说明：本文件为工作流的结构描述文档，供阅读和规划使用。
+# 实际执行入口为 scripts/hs_workflow.py，请以该脚本为准。
+# 各 step 中的 script 字段标注了实际执行的脚本文件名。
+# -----------------------------------------------------------------------
+
+steps:
+  - id: input_router
+    name: "输入路由"
+    type: "system"
+    script: "scripts/hs_workflow.py"
+    description: "根据输入类型分流到文档解析或文本查询"
+    inputs:
+      - name: "user_input"
+        type: "string"
+        required: true
+    outputs:
+      - name: "input_mode"
+        type: "string"
+        enum: ["document", "text", "mixed"]
+    notes: |
+      当前实现支持文本/文档输入，图片初判尚未实现，输入路由以文本为主。
+
+  - id: normalize_product_info
+    name: "商品信息标准化"
+    type: "system"
+    script: "scripts/hs_workflow.py → build_declaration_elements()"
+    description: "从查询文本中推断商品基本属性（是否电池、是否成套、危险品标记等）"
+    outputs:
+      - name: "normalized_product_info"
+        type: "object"
+
+  - id: hs_code_lookup
+    name: "HS 编码归类查询"
+    type: "system"
+    script: "scripts/hs_workflow.py → classify_product()"
+    description: |
+      多级查询：
+        1. cache_store（本地缓存，含 TTL 过期检查）
+        2. synced_hs_rules（自动同步税则规则）
+        3. live_lookup_agent.py（在线实时补查）
+        4. 以上均失败 → 标记人工复核
+    outputs:
+      - name: "hs_candidates_cn"
+        type: "array"
+
+  - id: export_rebate_checker
+    name: "退税率查询"
+    type: "system"
+    script: "scripts/hs_workflow.py → lookup_bucket('rebate')"
+    description: |
+      查询顺序同上（cache → synced_rebate_rates → live_lookup → 人工复核）。
+      TTL：30 天。退税率政策调整频繁，超期自动重新补查。
+    inputs:
+      - name: "hs_candidates_cn"
+        value: "{{hs_candidates_cn}}"
+    outputs:
+      - name: "rebate_result"
+        type: "object"
+
+  - id: supervision_checker
+    name: "监管条件查询"
+    type: "system"
+    script: "scripts/hs_workflow.py → lookup_bucket('supervision')"
+    description: |
+      查询顺序同上（cache → synced_supervision_conditions → live_lookup → 人工复核）。
+      TTL：60 天。
+    inputs:
+      - name: "hs_candidates_cn"
+        value: "{{hs_candidates_cn}}"
+    outputs:
+      - name: "supervision_result"
+        type: "object"
+
+  - id: hs_mapper_cn_id
+    name: "中国-印尼编码候选映射"
+    type: "system"
+    script: "scripts/hs_workflow.py → lookup_bucket('cn_id_mapping')"
+    description: |
+      查询顺序同上（cache → synced_cn_id_mapping → live_lookup → 人工复核）。
+      TTL：60 天。此字段非强制，未命中时不阻断主流程。
+    inputs:
+      - name: "hs_candidates_cn"
+        value: "{{hs_candidates_cn}}"
+    outputs:
+      - name: "cn_id_mapping_result"
+        type: "object"
+
+  - id: declaration_elements_writer
+    name: "报关要素生成"
+    type: "system"
+    script: "scripts/hs_workflow.py → build_declaration_elements()"
+    description: "生成报关申报所需要素（商品名称、用途、材质、品牌、型号等），缺失字段标注待补充"
+    outputs:
+      - name: "declaration_elements"
+        type: "object"
+
+  - id: result_aggregator
+    name: "结果聚合与输出"
+    type: "system"
+    script: "scripts/hs_workflow.py → build_result() + scripts/render_outputs.py"
+    description: "整合所有查询结果，汇总人工复核原因，生成 JSON + Markdown 报告文件"
+    inputs:
+      - name: "hs_candidates_cn"
+        value: "{{hs_candidates_cn}}"
+      - name: "declaration_elements"
+        value: "{{declaration_elements}}"
+      - name: "rebate_result"
+        value: "{{rebate_result}}"
+      - name: "supervision_result"
+        value: "{{supervision_result}}"
+      - name: "cn_id_mapping_result"
+        value: "{{cn_id_mapping_result}}"
+    outputs:
+      - name: "final_result"
+        type: "object"
+
+# -----------------------------------------------------------------------
+# 数据同步流程（手动触发，非自动）
+# 脚本：scripts/data_sync.py
+# 用法：python3 scripts/data_sync.py --source <文件> --target <hs|rebate|supervision|mapping>
+# 合并策略：以 hs_code_cn 为主键做增量 upsert，不覆盖已有记录
+# -----------------------------------------------------------------------

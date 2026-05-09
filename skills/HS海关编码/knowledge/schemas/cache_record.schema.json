@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CacheRecord",
+  "type": "object",
+  "required": [
+    "query_key",
+    "query_type",
+    "source_type",
+    "source_reference",
+    "fetched_at",
+    "confidence"
+  ],
+  "properties": {
+    "query_key": { "type": "string" },
+    "query_type": { "type": "string" },
+    "hs_code_cn": { "type": "string" },
+    "product_name_cn": { "type": "string" },
+    "description": { "type": "string" },
+    "rebate_rate": { "type": "string" },
+    "supervision_code": { "type": "string" },
+    "required_documents": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "id_hs_code": { "type": "string" },
+    "mapping_basis": { "type": "string" },
+    "source_type": { "type": "string" },
+    "source_quality": { "type": "string" },
+    "source_reference": { "type": "string" },
+    "fetched_at": { "type": "string" },
+    "confidence": { "type": "number" },
+    "review_required": { "type": "boolean" }
+  }
+}

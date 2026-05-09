@@ -1,0 +1,6 @@
+{
+  "name": "HS海关编码",
+  "version": "1.0.0",
+  "description": "免手工录库版 HS 海关编码归类与出口报关查询工作流",
+  "entry": "workflow.yaml"
+}
